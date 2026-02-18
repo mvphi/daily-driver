@@ -241,14 +241,14 @@ export default function Home() {
   const rowStyle = (delay: number): React.CSSProperties => ({
     opacity: animated ? 0 : 1,
     transform: animated ? "translateY(-10px)" : "translateY(0)",
-    transition: "opacity 250ms var(--ease-spring), transform 250ms var(--ease-spring)",
+    transition: "opacity 250ms var(--ease-spring-soft), transform 250ms var(--ease-spring-soft)",
     transitionDelay: `${delay}ms`,
   });
 
   return (
     <div
       ref={outerRef}
-      className="min-h-dvh w-full flex flex-col justify-start items-center bg-[#E5E0E0] overflow-y-scroll min-[812px]:justify-center"
+      className="min-h-dvh w-full flex flex-col justify-start items-center overflow-hidden bg-[#E5E0E0] min-[812px]:justify-center"
       style={{
         paddingTop: `calc(${isFocused ? 0 : centerOffset}px + env(safe-area-inset-top, 0px))`,
         paddingRight: "env(safe-area-inset-right, 0px)",
@@ -278,7 +278,10 @@ export default function Home() {
           flexDirection: "column",
           alignItems: "center",
           paddingTop: "max(24px, env(safe-area-inset-top, 0px))",
-          paddingBottom: "max(64px, env(safe-area-inset-bottom, 0px))",
+          // paddingBottom: "max(64px, env(safe-area-inset-bottom, 0px))",
+          paddingBottom: animated
+            ? "min(96px, max(64px, env(safe-area-inset-bottom, 0px)))" // max padding when focused: change 96px to cap
+            : "max(64px, env(safe-area-inset-bottom, 0px))",
           paddingLeft: "env(safe-area-inset-left, 0px)",
           paddingRight: "env(safe-area-inset-right, 0px)",
           pointerEvents: animated ? "auto" : "none",

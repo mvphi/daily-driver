@@ -39,6 +39,7 @@ body {
   padding: 0;
   height: 100%;
   min-height: 100dvh;
+  max-height: 100dvh;
 }
 
 /* Safari uses html for the area under notch/bottom bar */
