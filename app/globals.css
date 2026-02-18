@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #E5E0E0;
+  /* --foreground: #171717; */
 }
 
 @theme inline {
@@ -15,20 +15,42 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: rgba(229, 224, 224, 1);
   }
 }
 
+/* Reset + full-height foundation (fill safe areas on iOS with viewport-fit=cover) */
+html,
 body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100dvh;
+}
+
+/* Safari uses html for the area under notch/bottom bar */
+html {
   background: var(--background);
+}
+
+/* Main document styling */
+body {
+  min-height: 100dvh;
+  background: transparent; /* allows html to control bleed */
   color: var(--foreground);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-/* Hide scrollbar initially for textarea, allow scroll when needed */
+/* Ink bleed: 0.75px Gaussian blur for duplicated text layer */
+.ink-bleed-blur {
+  filter: blur(0.75px);
+}
+
+/* Hide scrollbar initially for textarea */
 .textarea-no-scrollbar {
   scrollbar-width: none;
 }
+
 .textarea-no-scrollbar::-webkit-scrollbar {
   display: none;
 }

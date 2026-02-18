@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.figma.com)",
+      "mcp__figma__view_node",
+      "Bash(claude mcp:*)",
+      "Bash(claude:*)",
+      "Bash(/Users/meganphi/.local/bin/claude mcp list:*)",
+      "Bash(curl:*)",
+      "Bash(ngrok:*)",
+      "Bash(gifsicle:*)"
+    ]
+  }
+}
