@@ -56,6 +56,9 @@ export default function Home() {
   const [centerOffset, setCenterOffset] = useState(0);
   const [vvHeight, setVvHeight] = useState<number | null>(null);
   const [textareaValue, setTextareaValue] = useState("");
+  const [ckPreviewPos, setCkPreviewPos] = useState<{ x: number; y: number } | null>(null);
+  const [anubisPreviewPos, setAnubisPreviewPos] = useState<{ x: number; y: number } | null>(null);
+  const [osumePreviewPos, setOsumePreviewPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
@@ -264,6 +267,75 @@ export default function Home() {
         aria-hidden
       />
 
+      {/* Savage65 link hover preview — 100px image following cursor to bottom-right */}
+      {ckPreviewPos && (
+        <div
+          className="pointer-events-none fixed z-[110]"
+          style={{
+            left: ckPreviewPos.x + 12,
+            top: ckPreviewPos.y + 12,
+            width: "144px",
+            zIndex: 50,
+            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.25)",
+          }}
+        >
+          <img
+            src="/images/link-out/ck-preview.png"
+            alt=""
+            width={100}
+            height="auto"
+            className="block w-full h-auto"
+            aria-hidden
+          />
+        </div>
+      )}
+
+      {/* Anubis link hover preview — 100px image following cursor to bottom-right */}
+      {anubisPreviewPos && (
+        <div
+          className="pointer-events-none fixed z-[110]"
+          style={{
+            left: anubisPreviewPos.x + 12,
+            top: anubisPreviewPos.y + 12,
+            width: "144px",
+            zIndex: 50,
+            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.25)",
+          }}
+        >
+          <img
+            src="/images/link-out/anubis-preview.png"
+            alt=""
+            width={100}
+            height="auto"
+            className="block w-full h-auto"
+            aria-hidden
+          />
+        </div>
+      )}
+
+      {/* Osume Matcha link hover preview — 100px image following cursor to bottom-right */}
+      {osumePreviewPos && (
+        <div
+          className="pointer-events-none fixed z-[110]"
+          style={{
+            left: osumePreviewPos.x + 12,
+            top: osumePreviewPos.y + 12,
+            width: "144px",
+            zIndex: 50,
+            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.25)",
+          }}
+        >
+          <img
+            src="/images/link-out/osume-preview.png"
+            alt=""
+            width={100}
+            height="auto"
+            className="block w-full h-auto"
+            aria-hidden
+          />
+        </div>
+      )}
+
       {/* Fixed header — image + label, shown only when animated on touch.
           Sits above the scroll content with a gradient/blur bleed. */}
       <div
@@ -387,24 +459,90 @@ export default function Home() {
               <div className="flex items-start justify-between" style={{ alignSelf: "stretch", ...rowStyle(0) }}>
                 <InkBleed className="text-sm font-semibold tracking-tight">CANNON KEYS</InkBleed>
                 <div className="flex flex-col items-end" style={{ width: "150px" }}>
-                  <InkBleed className="text-sm tracking-tight">SAVAGE 65</InkBleed>
-                  <InkBleed className="text-sm tracking-tight">6.25u FR4 PLATE</InkBleed>
-                  <InkBleed className="text-sm tracking-tight">INSTANT 65 HOTSWAP</InkBleed>
+                  <a
+                    href="https://cannonkeys.com/products/savage65"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                    onMouseEnter={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setCkPreviewPos(null)}
+                    aria-label="Savage65 keyboard on CannonKeys"
+                  >
+                    <InkBleed className="text-sm tracking-tight">SAVAGE 65</InkBleed>
+                  </a>
+                  <a
+                    href="https://cannonkeys.com/products/savage65"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                    onMouseEnter={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setCkPreviewPos(null)}
+                    aria-label="6.25u FR4 Plate for Savage65"
+                  >
+                    <InkBleed className="text-sm tracking-tight">6.25u FR4 PLATE</InkBleed>
+                  </a>
+                  <a
+                    href="https://cannonkeys.com/products/savage65"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                    onMouseEnter={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={(e) => setCkPreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setCkPreviewPos(null)}
+                    aria-label="Instant65 Hotswap PCB for Savage65"
+                  >
+                    <InkBleed className="text-sm tracking-tight">INSTANT 65 HOTSWAP</InkBleed>
+                  </a>
                 </div>
               </div>
 
               {/* MECHS ON DECK */}
               <div className="flex items-start justify-between" style={{ alignSelf: "stretch", ...rowStyle(50) }}>
                 <InkBleed className="text-sm font-semibold tracking-tight">MECHS ON DECK</InkBleed>
-                <InkBleed className="text-sm tracking-tight">ANUBIS SWITCHES</InkBleed>
+                <a
+                  href="https://cannonkeys.com/products/anubis-switch"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-underline hover:underline"
+                  onMouseEnter={(e) => setAnubisPreviewPos({ x: e.clientX, y: e.clientY })}
+                  onMouseMove={(e) => setAnubisPreviewPos({ x: e.clientX, y: e.clientY })}
+                  onMouseLeave={() => setAnubisPreviewPos(null)}
+                  aria-label="Anubis Tactile Switch on CannonKeys"
+                >
+                  <InkBleed className="text-sm tracking-tight">ANUBIS SWITCHES</InkBleed>
+                </a>
               </div>
 
               {/* OSUME */}
               <div className="flex items-start justify-between" style={{ alignSelf: "stretch", ...rowStyle(100) }}>
                 <InkBleed className="text-sm font-semibold tracking-tight">OSUME</InkBleed>
                 <div className="flex flex-col items-end" style={{ width: "150px" }}>
-                  <InkBleed className="text-sm tracking-tight">MATCHA KEYCAPS</InkBleed>
-                  <InkBleed className="text-sm tracking-tight">CHERRY PROFILE</InkBleed>
+                  <a
+                    href="https://osume.com/products/matcha-keycaps"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                    onMouseEnter={(e) => setOsumePreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={(e) => setOsumePreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setOsumePreviewPos(null)}
+                    aria-label="Matcha Keycaps on Osume"
+                  >
+                    <InkBleed className="text-sm tracking-tight">MATCHA KEYCAPS</InkBleed>
+                  </a>
+                  <a
+                    href="https://osume.com/products/matcha-keycaps"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                    onMouseEnter={(e) => setOsumePreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={(e) => setOsumePreviewPos({ x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setOsumePreviewPos(null)}
+                    aria-label="Cherry Profile Matcha Keycaps on Osume"
+                  >
+                    <InkBleed className="text-sm tracking-tight">CHERRY PROFILE</InkBleed>
+                  </a>
                 </div>
               </div>
             </div>
