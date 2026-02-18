@@ -3,6 +3,19 @@
 :root {
   --background: #E5E0E0;
   /* --foreground: #171717; */
+
+  /* Spring-like easing options (cubic-bezier). Pick one for --ease-spring. */
+  /* Snappy settle, no overshoot (ease-out-back style): */
+  --ease-spring-snappy: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Gentle overshoot (classic spring bounce): */
+  --ease-spring-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  /* Softer overshoot: */
+  --ease-spring-soft: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Quick out, smooth settle (no bounce): */
+  --ease-spring-quick: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Active spring for “keyboard up” animation */
+  --ease-spring: var(--ease-spring-soft);
 }
 
 @theme inline {

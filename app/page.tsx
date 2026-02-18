@@ -45,8 +45,11 @@ export default function Home() {
   const mainRef = useRef<HTMLElement>(null);
   const leftImageRef = useRef<HTMLDivElement>(null);
   const headerImageRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const imageRectRef = useRef<DOMRect | null>(null);
   const textareaMirrorRef = useRef<HTMLDivElement>(null);
+  const caretMeasureRef = useRef<HTMLDivElement>(null);
+  const adjustScrollRef = useRef<(() => void) | null>(null);
   const { playSound } = useKeyboardSound();
   const [isFocused, setIsFocused] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -87,6 +90,76 @@ export default function Home() {
     mirror.style.minHeight = `${el.scrollHeight}px`;
   }, [textareaValue]);
 
+  // Keyboard avoidance: center the caret line in the visible area below the fixed header when focused on touch.
+  useEffect(() => {
+    if (!isTouch || !isFocused) return;
+
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const outer = outerRef.current;
+    const ta = textareaRef.current;
+    const header = headerRef.current;
+    const measureEl = caretMeasureRef.current;
+
+    const adjustScroll = () => {
+      if (!ta || !outer || outer.clientHeight <= 0) return;
+      if (document.activeElement !== ta) return;
+
+      // Visible region: from bottom of fixed header to bottom of visual viewport
+      const headerBottom = header ? header.getBoundingClientRect().bottom : vv.offsetTop;
+      const visibleBottomY = vv.offsetTop + vv.height;
+      const visibleCenter = headerBottom + (visibleBottomY - headerBottom) / 2;
+
+      // Caret line center: measure text height up to selectionStart, then line center
+      let caretLineCenterY: number;
+      if (measureEl) {
+        const start = ta.selectionStart;
+        measureEl.textContent = textareaValue.substring(0, start);
+        const measuredHeight = measureEl.offsetHeight;
+        const lineHeight =
+          parseFloat(getComputedStyle(ta).lineHeight) || parseFloat(getComputedStyle(ta).fontSize) * 1.2;
+        caretLineCenterY = ta.getBoundingClientRect().top + measuredHeight - lineHeight / 2;
+      } else {
+        const textareaRect = ta.getBoundingClientRect();
+        caretLineCenterY = textareaRect.top + textareaRect.height / 2;
+      }
+
+      const delta = caretLineCenterY - visibleCenter;
+      const layoutMaxScroll = Math.max(0, outer.scrollHeight - outer.clientHeight);
+      // When keyboard is open, don't allow scrolling content into the keyboard: cap max scroll
+      // so the bottom of the content stays at or above the visual viewport bottom.
+      const outerTop = outer.getBoundingClientRect().top;
+      const maxScrollWithKeyboard = Math.max(0, outer.scrollHeight - (visibleBottomY - outerTop));
+      const maxScroll = Math.min(layoutMaxScroll, maxScrollWithKeyboard);
+      const newScrollTop = Math.max(0, Math.min(maxScroll, outer.scrollTop + delta));
+      outer.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    };
+
+    adjustScrollRef.current = adjustScroll;
+    const timeoutId = setTimeout(adjustScroll, 400);
+    vv.addEventListener("resize", adjustScroll);
+    vv.addEventListener("scroll", adjustScroll);
+    document.addEventListener("selectionchange", adjustScroll);
+
+    return () => {
+      adjustScrollRef.current = null;
+      clearTimeout(timeoutId);
+      vv.removeEventListener("resize", adjustScroll);
+      vv.removeEventListener("scroll", adjustScroll);
+      document.removeEventListener("selectionchange", adjustScroll);
+    };
+  }, [isTouch, isFocused, textareaValue]);
+
+  // When user types, recenter the caret line after the DOM updates (measure div + layout).
+  useEffect(() => {
+    if (!isTouch || !isFocused) return;
+    const raf = requestAnimationFrame(() => {
+      adjustScrollRef.current?.();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isTouch, isFocused, textareaValue]);
+
   // Capture the left-column image rect BEFORE state changes, then trigger focus.
   const handleFocus = () => {
     if (isTouch && leftImageRef.current) {
@@ -126,12 +199,12 @@ export default function Home() {
       el.style.opacity = "1";
       el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
       el.getBoundingClientRect(); // force reflow before play
-      el.style.transition = "transform 400ms ease";
+      el.style.transition = "transform 400ms var(--ease-spring)";
       el.style.transform = "";
     } else {
       // Reverse — fade out (instantly on first render, with transition after).
       if (imageRectRef.current) {
-        el.style.transition = "opacity 250ms ease";
+        el.style.transition = "opacity 250ms var(--ease-spring)";
       } else {
         el.style.transition = "none";
       }
@@ -168,7 +241,7 @@ export default function Home() {
   const rowStyle = (delay: number): React.CSSProperties => ({
     opacity: animated ? 0 : 1,
     transform: animated ? "translateY(-10px)" : "translateY(0)",
-    transition: "opacity 250ms ease, transform 250ms ease",
+    transition: "opacity 250ms var(--ease-spring), transform 250ms var(--ease-spring)",
     transitionDelay: `${delay}ms`,
   });
 
@@ -181,7 +254,7 @@ export default function Home() {
         paddingRight: "env(safe-area-inset-right, 0px)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "env(safe-area-inset-left, 0px)",
-        transition: "padding-top 400ms ease-in-out",
+        transition: "padding-top 400ms var(--ease-spring)",
       }}
     >
       {/* Texture overlay */}
@@ -194,6 +267,7 @@ export default function Home() {
       {/* Fixed header — image + label, shown only when animated on touch.
           Sits above the scroll content with a gradient/blur bleed. */}
       <div
+        ref={headerRef}
         style={{
           position: "fixed",
           top: 0,
@@ -223,7 +297,7 @@ export default function Home() {
             maskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
             opacity: animated ? 1 : 0,
-            transition: "opacity 300ms ease",
+            transition: "opacity 300ms var(--ease-spring)",
             transitionDelay: animated ? "100ms" : "0ms",
           }}
         />
@@ -244,7 +318,7 @@ export default function Home() {
             style={{
               color: "#595959",
               opacity: animated ? 1 : 0,
-              transition: "opacity 300ms ease",
+              transition: "opacity 300ms var(--ease-spring)",
               transitionDelay: animated ? "150ms" : "0ms",
             }}
           >
@@ -281,9 +355,9 @@ export default function Home() {
         ref={mainRef}
         className="relative z-10 mx-auto flex h-fit w-fit max-w-[960px] flex-col flex-nowrap justify-start items-start gap-[72px] min-[812px]:flex-row min-[812px]:gap-[24px] min-[957px]:gap-[72px]"
         style={{
-          paddingTop: animated ? "200px" : "24px",
+          paddingTop: animated ? "0px" : "24px",
           gap: animated ? "0px" : undefined,
-          transition: "padding-top 400ms ease",
+          transition: "padding-top 400ms var(--ease-spring)",
         }}
       >
         {/* LEFT COLUMN */}
@@ -303,7 +377,7 @@ export default function Home() {
                 alignSelf: "stretch",
                 maxHeight: animated ? "0px" : "500px",
                 overflow: "hidden",
-                transition: "max-height 400ms ease",
+                transition: "max-height 400ms var(--ease-spring)",
               }}
             >
               {/* CANNON KEYS */}
@@ -349,7 +423,7 @@ export default function Home() {
                   backgroundSize: "cover",
                   mixBlendMode: "multiply",
                   opacity: animated ? 0 : 1,
-                  transition: "opacity 200ms ease",
+                  transition: "opacity 200ms var(--ease-spring)",
                 }}
                 role="img"
                 aria-label="Savage 65 mechanical keyboard"
@@ -365,7 +439,7 @@ export default function Home() {
                 overflow: "hidden",
                 opacity: animated ? 0 : 1,
                 transform: animated ? "translateY(-10px)" : "translateY(0)",
-                transition: "max-height 400ms ease, opacity 250ms ease, transform 250ms ease",
+                transition: "max-height 400ms var(--ease-spring), opacity 250ms var(--ease-spring), transform 250ms var(--ease-spring)",
                 transitionDelay: animated ? "80ms" : "0ms",
               }}
             >
@@ -388,6 +462,18 @@ export default function Home() {
 
         {/* RIGHT COLUMN */}
         <div className="relative flex h-fit w-[370px] flex-col pl-0 min-[812px]:h-full min-[812px]:min-h-full">
+          {/* Hidden div to measure caret line position (same font/width as textarea) */}
+          <div
+            ref={caretMeasureRef}
+            className="pointer-events-none absolute left-0 top-0 w-full font-mono py-0 text-base min-[812px]:text-sm"
+            style={{
+              visibility: "hidden",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              overflow: "hidden",
+            }}
+            aria-hidden
+          />
           {/* Blurred ink-bleed mirror of textarea content (or placeholder when empty) */}
           <div
             ref={textareaMirrorRef}
