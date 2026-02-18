@@ -252,9 +252,9 @@ export default function Home() {
       style={{
         paddingTop: `calc(${isFocused ? 0 : centerOffset}px + env(safe-area-inset-top, 0px))`,
         paddingRight: "env(safe-area-inset-right, 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingBottom: isTouch && !isFocused ? "calc(370px + 24px + env(safe-area-inset-bottom, 0px))" : "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "env(safe-area-inset-left, 0px)",
-        transition: "padding-top 400ms var(--ease-spring)",
+        transition: "padding-top 400ms var(--ease-spring), padding-bottom 400ms var(--ease-spring)",
       }}
     >
       {/* Texture overlay */}
@@ -461,7 +461,18 @@ export default function Home() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="relative flex h-fit w-[370px] flex-col pl-0 min-[812px]:h-full min-[812px]:min-h-full">
+        <div 
+          className="relative flex h-fit w-[370px] flex-col pl-0 min-[812px]:h-full min-[812px]:min-h-full"
+          style={{
+            position: isTouch && !isFocused ? "fixed" : "relative",
+            bottom: isTouch && !isFocused ? "env(safe-area-inset-bottom, 0px)" : "auto",
+            left: isTouch && !isFocused ? "50%" : "auto",
+            transform: isTouch && !isFocused ? "translateX(-50%)" : "none",
+            width: isTouch && !isFocused ? "370px" : "auto",
+            zIndex: isTouch && !isFocused ? 40 : 10,
+            pointerEvents: "auto",
+          }}
+        >
           {/* Hidden div to measure caret line position (same font/width as textarea) */}
           <div
             ref={caretMeasureRef}
@@ -483,6 +494,7 @@ export default function Home() {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
               color: textareaValue ? "black" : "#999999",
+              maxHeight: isFocused ? "none" : "200px",
             }}
             aria-hidden
           >
@@ -499,7 +511,10 @@ export default function Home() {
             onChange={handleInput}
             onTouchStart={handleTextareaTouchStart}
             className="textarea-no-scrollbar relative z-10 font-mono w-full resize-none overflow-hidden border-none bg-transparent py-0 text-base text-black outline-none placeholder:text-[#999999] focus:ring-0 min-[812px]:text-sm min-[812px]:min-h-[424px]"
-            style={{ overflowWrap: "break-word" }}
+            style={{ 
+              overflowWrap: "break-word",
+              maxHeight: isTouch && !isFocused ? "80px" : "none",
+            }}
           />
         </div>
 
